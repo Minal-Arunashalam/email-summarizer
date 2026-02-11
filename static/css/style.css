@@ -303,6 +303,66 @@ footer {
     margin-top: 32px;
 }
 
+/* Email summary cards */
+.email-summaries {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.email-card {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+}
+
+.email-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.email-number {
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.email-subject {
+    font-size: 1rem;
+    font-weight: 600;
+    flex: 1;
+    min-width: 200px;
+}
+
+.email-date {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.email-summary {
+    padding-left: 12px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.email-summary p {
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.email-summary p:last-child {
+    margin-bottom: 0;
+}
+
 /* Loading spinner */
 .spinner {
     width: 16px;

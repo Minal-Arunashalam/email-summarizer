@@ -32,18 +32,15 @@ def create_oauth_flow() -> Flow:
     return flow
 
 
-def get_authorization_url() -> tuple[str, str]:
-    """
-    Generate authorization URL for Google OAuth.
-    Returns (authorization_url, state).
-    """
+def get_authorization_url() -> str:
+    """Generate authorization URL for Google OAuth."""
     flow = create_oauth_flow()
-    authorization_url, state = flow.authorization_url(
+    authorization_url, _ = flow.authorization_url(
         access_type="offline",
         include_granted_scopes="true",
         prompt="consent",  # Force consent to get refresh token
     )
-    return authorization_url, state
+    return authorization_url
 
 
 async def exchange_code_for_tokens(code: str) -> dict:

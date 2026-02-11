@@ -33,19 +33,8 @@ def get_session_user_id(request: Request) -> int | None:
 @router.get("/login")
 async def login(request: Request):
     """Initiate Google OAuth login."""
-    authorization_url, state = get_authorization_url()
-
-    response = RedirectResponse(url=authorization_url)
-    # Store state in cookie for CSRF protection
-    response.set_cookie(
-        key="oauth_state",
-        value=state,
-        httponly=True,
-        secure=False,  # Set to True in production with HTTPS
-        samesite="lax",
-        max_age=600,  # 10 minutes
-    )
-    return response
+    authorization_url = get_authorization_url()
+    return RedirectResponse(url=authorization_url)
 
 
 @router.get("/callback")
@@ -62,11 +51,6 @@ async def callback(
 
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
-
-    # Verify state for CSRF protection
-    stored_state = request.cookies.get("oauth_state")
-    if not stored_state or stored_state != state:
-        raise HTTPException(status_code=400, detail="Invalid state parameter")
 
     try:
         # Exchange code for tokens
@@ -88,9 +72,6 @@ async def callback(
             samesite="lax",
             max_age=86400 * 7,  # 7 days
         )
-        # Clear oauth state cookie
-        response.delete_cookie("oauth_state")
-
         return response
 
     except Exception as e:

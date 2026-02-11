@@ -4,22 +4,33 @@
 
 {% block content %}
 <div class="results-page">
-    <h2>Email Summary</h2>
+    <h2>Email Summaries</h2>
 
     <div class="summary-meta">
         <span class="meta-item">
             <strong>From:</strong> {{ sender_email }}
         </span>
         <span class="meta-item">
-            <strong>Emails analyzed:</strong> {{ email_count }}
+            <strong>Emails summarized:</strong> {{ email_count }}
         </span>
     </div>
 
-    <div class="summary-content">
-        {% for line in summary.split('\n') %}
-            {% if line.strip() %}
-            <p>{{ line }}</p>
-            {% endif %}
+    <div class="email-summaries">
+        {% for email in summaries %}
+        <div class="email-card">
+            <div class="email-header">
+                <span class="email-number">#{{ loop.index }}</span>
+                <h3 class="email-subject">{{ email.subject }}</h3>
+                <span class="email-date">{{ email.date }}</span>
+            </div>
+            <div class="email-summary">
+                {% for line in email.summary.split('\n') %}
+                    {% if line.strip() %}
+                    <p>{{ line }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
         {% endfor %}
     </div>
 

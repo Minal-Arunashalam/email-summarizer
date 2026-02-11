@@ -44,12 +44,19 @@ app.include_router(auth_router)
 # Request/Response models
 class SummarizeRequest(BaseModel):
     sender_email: EmailStr
-    num_lines: int = 5
+    num_lines: int = 2
     max_emails: int = 10
 
 
-class SummarizeResponse(BaseModel):
+class EmailSummary(BaseModel):
+    subject: str
+    date: str
+    snippet: str
     summary: str
+
+
+class SummarizeResponse(BaseModel):
+    summaries: list[EmailSummary]
     email_count: int
     sender_email: str
 
@@ -129,10 +136,10 @@ async def api_summarize(
         raise HTTPException(status_code=401, detail="User not found")
 
     # Validate num_lines
-    if data.num_lines < 1 or data.num_lines > 20:
+    if data.num_lines < 1 or data.num_lines > 10:
         raise HTTPException(
             status_code=400,
-            detail="Number of lines must be between 1 and 20",
+            detail="Number of lines must be between 1 and 10",
         )
 
     # Validate max_emails
@@ -156,16 +163,16 @@ async def api_summarize(
                 detail=f"No emails found from {data.sender_email}",
             )
 
-        # Summarize
-        summary = await summarize_emails(
+        # Summarize each email individually
+        summaries = await summarize_emails(
             emails=emails,
             num_lines=data.num_lines,
             sender_email=data.sender_email,
         )
 
         return SummarizeResponse(
-            summary=summary,
-            email_count=len(emails),
+            summaries=summaries,
+            email_count=len(summaries),
             sender_email=data.sender_email,
         )
 

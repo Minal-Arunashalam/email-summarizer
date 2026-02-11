@@ -24,7 +24,12 @@ class Settings(BaseSettings):
     token_encryption_key: str
 
     # Gmail API scopes
-    gmail_scopes: list[str] = ["https://www.googleapis.com/auth/gmail.readonly"]
+    gmail_scopes: list[str] = [
+        "openid",
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+    ]
 
     class Config:
         env_file = ".env"

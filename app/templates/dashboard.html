@@ -5,7 +5,7 @@
 {% block content %}
 <div class="dashboard">
     <h2>Summarize Emails</h2>
-    <p>Enter a sender's email address and choose how many lines you want in your summary.</p>
+    <p>Enter a sender's email address to get individual summaries for each email.</p>
 
     <form id="summarize-form" class="summarize-form">
         <div class="form-group">
@@ -21,31 +21,32 @@
         </div>
 
         <div class="form-group">
-            <label for="num_lines">Number of Summary Lines</label>
+            <label for="num_lines">Lines per Email Summary</label>
             <select id="num_lines" name="num_lines" required>
-                <option value="3">3 lines - Quick overview</option>
-                <option value="5" selected>5 lines - Standard summary</option>
-                <option value="7">7 lines - Detailed summary</option>
-                <option value="10">10 lines - Comprehensive summary</option>
+                <option value="1">1 line - One sentence each</option>
+                <option value="2" selected>2 lines - Brief summary</option>
+                <option value="3">3 lines - Standard summary</option>
+                <option value="5">5 lines - Detailed summary</option>
             </select>
+            <small>Number of summary lines for each individual email</small>
         </div>
 
         <div class="form-group">
-            <label for="max_emails">Maximum Emails to Analyze</label>
+            <label for="max_emails">Number of Emails to Summarize</label>
             <select id="max_emails" name="max_emails">
-                <option value="5">5 emails</option>
-                <option value="10" selected>10 emails</option>
-                <option value="20">20 emails</option>
+                <option value="10">10 emails</option>
+                <option value="25">25 emails</option>
                 <option value="50">50 emails</option>
+                <option value="100">100 emails</option>
             </select>
-            <small>More emails provide better context but take longer to process</small>
+            <small>Each email will receive its own individual summary</small>
         </div>
 
         <button type="submit" class="btn btn-primary" id="submit-btn">
-            <span class="btn-text">Generate Summary</span>
+            <span class="btn-text">Generate Summaries</span>
             <span class="btn-loading" style="display: none;">
                 <span class="spinner"></span>
-                Processing...
+                Summarizing emails...
             </span>
         </button>
     </form>
@@ -53,12 +54,12 @@
     <div id="error-message" class="error-message" style="display: none;"></div>
 
     <div id="results" class="results" style="display: none;">
-        <h3>Summary</h3>
+        <h3>Email Summaries</h3>
         <div class="summary-meta">
             <span id="result-sender"></span>
             <span id="result-count"></span>
         </div>
-        <div id="summary-content" class="summary-content"></div>
+        <div id="summary-content" class="email-summaries"></div>
         <button type="button" class="btn btn-secondary" onclick="resetForm()">
             Summarize Another Sender
         </button>
@@ -108,8 +109,8 @@
 
             // Show results
             document.getElementById('result-sender').textContent = `From: ${formData.sender_email}`;
-            document.getElementById('result-count').textContent = `${data.email_count} emails analyzed`;
-            document.getElementById('summary-content').innerHTML = formatSummary(data.summary);
+            document.getElementById('result-count').textContent = `${data.email_count} emails summarized`;
+            document.getElementById('summary-content').innerHTML = formatSummaries(data.summaries);
             results.style.display = 'block';
             form.style.display = 'none';
 
@@ -124,13 +125,27 @@
         }
     });
 
-    function formatSummary(summary) {
-        // Convert bullet points and newlines to HTML
-        return summary
-            .split('\n')
-            .filter(line => line.trim())
-            .map(line => `<p>${escapeHtml(line)}</p>`)
-            .join('');
+    function formatSummaries(summaries) {
+        return summaries.map((email, index) => {
+            const summaryLines = email.summary
+                .split('\n')
+                .filter(line => line.trim())
+                .map(line => `<p>${escapeHtml(line)}</p>`)
+                .join('');
+
+            return `
+                <div class="email-card">
+                    <div class="email-header">
+                        <span class="email-number">#${index + 1}</span>
+                        <h3 class="email-subject">${escapeHtml(email.subject)}</h3>
+                        <span class="email-date">${escapeHtml(email.date)}</span>
+                    </div>
+                    <div class="email-summary">
+                        ${summaryLines}
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     function escapeHtml(text) {
