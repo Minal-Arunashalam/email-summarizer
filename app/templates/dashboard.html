@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Email Summarizer{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Summarize Emails</h2>
+    <p>Enter a sender's email address and choose how many lines you want in your summary.</p>
+
+    <form id="summarize-form" class="summarize-form">
+        <div class="form-group">
+            <label for="sender_email">Sender Email Address</label>
+            <input
+                type="email"
+                id="sender_email"
+                name="sender_email"
+                placeholder="example@company.com"
+                required
+            >
+            <small>Enter the email address of the sender whose emails you want to summarize</small>
+        </div>
+
+        <div class="form-group">
+            <label for="num_lines">Number of Summary Lines</label>
+            <select id="num_lines" name="num_lines" required>
+                <option value="3">3 lines - Quick overview</option>
+                <option value="5" selected>5 lines - Standard summary</option>
+                <option value="7">7 lines - Detailed summary</option>
+                <option value="10">10 lines - Comprehensive summary</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="max_emails">Maximum Emails to Analyze</label>
+            <select id="max_emails" name="max_emails">
+                <option value="5">5 emails</option>
+                <option value="10" selected>10 emails</option>
+                <option value="20">20 emails</option>
+                <option value="50">50 emails</option>
+            </select>
+            <small>More emails provide better context but take longer to process</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn">
+            <span class="btn-text">Generate Summary</span>
+            <span class="btn-loading" style="display: none;">
+                <span class="spinner"></span>
+                Processing...
+            </span>
+        </button>
+    </form>
+
+    <div id="error-message" class="error-message" style="display: none;"></div>
+
+    <div id="results" class="results" style="display: none;">
+        <h3>Summary</h3>
+        <div class="summary-meta">
+            <span id="result-sender"></span>
+            <span id="result-count"></span>
+        </div>
+        <div id="summary-content" class="summary-content"></div>
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+            Summarize Another Sender
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const form = document.getElementById('summarize-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const errorMessage = document.getElementById('error-message');
+    const results = document.getElementById('results');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Show loading state
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline-flex';
+        submitBtn.disabled = true;
+        errorMessage.style.display = 'none';
+        results.style.display = 'none';
+
+        const formData = {
+            sender_email: document.getElementById('sender_email').value,
+            num_lines: parseInt(document.getElementById('num_lines').value),
+            max_emails: parseInt(document.getElementById('max_emails').value)
+        };
+
+        try {
+            const response = await fetch('/api/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'An error occurred');
+            }
+
+            // Show results
+            document.getElementById('result-sender').textContent = `From: ${formData.sender_email}`;
+            document.getElementById('result-count').textContent = `${data.email_count} emails analyzed`;
+            document.getElementById('summary-content').innerHTML = formatSummary(data.summary);
+            results.style.display = 'block';
+            form.style.display = 'none';
+
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+        } finally {
+            // Reset button state
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    });
+
+    function formatSummary(summary) {
+        // Convert bullet points and newlines to HTML
+        return summary
+            .split('\n')
+            .filter(line => line.trim())
+            .map(line => `<p>${escapeHtml(line)}</p>`)
+            .join('');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function resetForm() {
+        form.style.display = 'block';
+        results.style.display = 'none';
+        form.reset();
+    }
+</script>
+{% endblock %}

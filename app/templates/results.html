@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Summary Results - Email Summarizer{% endblock %}
+
+{% block content %}
+<div class="results-page">
+    <h2>Email Summary</h2>
+
+    <div class="summary-meta">
+        <span class="meta-item">
+            <strong>From:</strong> {{ sender_email }}
+        </span>
+        <span class="meta-item">
+            <strong>Emails analyzed:</strong> {{ email_count }}
+        </span>
+    </div>
+
+    <div class="summary-content">
+        {% for line in summary.split('\n') %}
+            {% if line.strip() %}
+            <p>{{ line }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="actions">
+        <a href="/dashboard" class="btn btn-primary">Summarize More Emails</a>
+        <a href="/auth/logout" class="btn btn-secondary">Logout</a>
+    </div>
+</div>
+{% endblock %}
