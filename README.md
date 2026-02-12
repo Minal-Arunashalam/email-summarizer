@@ -1,6 +1,6 @@
 # Email Summarizer
 
-A Python web application that authenticates with Gmail via OAuth, fetches emails from a specified sender, and uses Claude API to generate AI-powered summaries.
+A Python web application that authenticates with Gmail via OAuth, fetches emails from a specified sender, and uses Claude API to generate AI-powered summaries. The summaries are PER email, not one holistic summary of all emails.
 
 ## Features
 
